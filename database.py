@@ -6,7 +6,6 @@ import pandas as pd
 engine = create_engine('mysql+pymysql://root:usxrryoa@localhost/hotel')
 Base = declarative_base()
 
-# Define the Review table
 class Review(Base):
     __tablename__ = 'reviews'
 
@@ -17,26 +16,38 @@ class Review(Base):
 # Create the table if it doesn't exist
 Base.metadata.create_all(engine)
 
-# Load the data
-csv_file_path = 'Hotel_Reviews_Prepared.csv'  # Make sure the CSV path is correct
-reviews_df = pd.read_csv(csv_file_path)
-
-reviews_df.dropna(subset=['text', 'label'], inplace=True)
-
-# Start a session
+# Inserting data from prepared csv
 Session = sessionmaker(bind=engine)
 session = Session()
 
-# Insert data
-for index, row in reviews_df.iterrows():
-    review = Review(
-        review_text=row['text'],
-        is_positive_review=row['label']
-    )
-    session.add(review)
+# Uncomment to re-add data
+# csv_file_path = 'Hotel_Reviews_Prepared.csv'
+# reviews_df = pd.read_csv(csv_file_path)
 
-# Commit the transaction
-session.commit()
+# reviews_df.dropna(subset=['text', 'label'], inplace=True)
+# for index, row in reviews_df.iterrows():
+#     review = Review(
+#         review_text=row['text'],
+#         is_positive_review=row['label']
+#     )
+#     session.add(review)
 
-# Close the session
+# session.commit()
+
+# Creating stored procedure
+sp_query = """
+CREATE PROCEDURE GetReviews()
+BEGIN
+    SELECT review_text, is_positive_review FROM reviews;
+END;
+"""
+
+conn = engine.raw_connection()
+cursor = conn.cursor()
+cursor.execute(sp_query)
+conn.commit()
+cursor.close()
+conn.close()
+
 session.close()
+
