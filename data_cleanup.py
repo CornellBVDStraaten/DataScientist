@@ -28,15 +28,15 @@ df = pd.read_csv("./Hotel_Reviews_Cleaned.csv")
 dfTest = df.copy()
 
 def clean_text(text):
-    text = text.lower()  # Lowercase
-    text = re.sub(r'\d+', '', text)  # Remove numbers
-    text = ' '.join(text.split())  # Remove extra whitespace
+    text = text.lower()
+    text = re.sub(r'\d+', '', text) 
+    text = ' '.join(text.split()) 
     return text
 
 def remove_stopwords(text):
-    text = text.translate(str.maketrans('', '', string.punctuation))  # Remove punctuation
+    text = text.translate(str.maketrans('', '', string.punctuation))
     words = text.split()
-    words = [word for word in words if word not in stop_words]  # Remove stopwords
+    words = [word for word in words if word not in stop_words] 
     text = ' '.join(words)
     return text
 
@@ -50,7 +50,7 @@ def get_wordnet_pos(tag):
     elif tag.startswith('R'):
         return wordnet.ADV
     else:
-        return wordnet.NOUN  # Default to noun
+        return wordnet.NOUN
     
 def lemmatize(text):
     words = text.split()
@@ -59,7 +59,7 @@ def lemmatize(text):
     text = ' '.join(lemmatized_words)
     return text
 
-# Reduce memory usage / remove need for check in functions
+# set types for speed / memory usage reduction
 dfTest['Positive_Review'] = dfTest['Positive_Review'].astype(str)
 dfTest['Negative_Review'] = dfTest['Negative_Review'].astype(str)
 for col in ['Positive_Review', 'Negative_Review']:
@@ -82,4 +82,3 @@ negative = negative[~negative['text'].str.strip().str.lower().eq('negative')]
 final_df = pd.concat([positive[['text', 'label']], negative[['text', 'label']]]).dropna().reset_index(drop=True)
 
 final_df.to_csv("./Hotel_Reviews_Prepared.csv", index=False)
-# End goal: One CSV with 2 columns, text and a boolean if it is negative or positive
